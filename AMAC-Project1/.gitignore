@@ -1,0 +1,24 @@
+# Ignore Datasets and Large Files
+data/
+datasets/
+raw_data/
+*.mp4
+*.mpg
+*.avi
+*.zip
+*.tar.gz
+
+# Ignore Python Cache and Virtual Env
+__pycache__/
+*.pyc
+venv/
+env/
+.venv/
+
+# Ignore IDE settings
+.vscode/
+
+# Ignore large model weights (send these separately)
+*.pth
+*.pt
+weights/

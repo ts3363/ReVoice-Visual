@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMAC Therapy - Sign Up</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+        }
+        .signup-box { 
+            background: white; 
+            padding: 40px; 
+            border-radius: 15px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2); 
+            width: 400px; 
+            text-align: center; 
+        }
+        h1 { 
+            color: #2c5aa0; 
+            margin-bottom: 8px; 
+            font-size: 28px; 
+        }
+        .subtitle { 
+            color: #666; 
+            margin-bottom: 30px; 
+            font-size: 16px; 
+        }
+        input { 
+            width: 100%; 
+            padding: 14px; 
+            margin: 10px 0; 
+            border: 2px solid #e1e5e9; 
+            border-radius: 8px; 
+            box-sizing: border-box; 
+            font-size: 16px; 
+            transition: border 0.3s;
+        }
+        input:focus { 
+            outline: none; 
+            border-color: #2c5aa0; 
+            box-shadow: 0 0 0 3px rgba(44,90,160,0.1);
+        }
+        button { 
+            width: 100%; 
+            background: linear-gradient(135deg, #2c5aa0 0%, #1e3c72 100%); 
+            color: white; 
+            border: none; 
+            padding: 16px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 16px; 
+            font-weight: 600; 
+            margin-top: 15px; 
+            transition: transform 0.2s;
+        }
+        button:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 5px 15px rgba(44,90,160,0.3);
+        }
+        .links { 
+            margin-top: 20px; 
+            font-size: 14px; 
+            color: #666;
+        }
+        a { 
+            color: #2c5aa0; 
+            text-decoration: none; 
+            font-weight: 500;
+        }
+        a:hover { text-decoration: underline; }
+        .error { 
+            color: #e53e3e; 
+            background: #fed7d7; 
+            padding: 12px; 
+            border-radius: 8px; 
+            margin-top: 15px; 
+            display: none;
+        }
+        .success { 
+            color: #38a169; 
+            background: #c6f6d5; 
+            padding: 12px; 
+            border-radius: 8px; 
+            margin-top: 15px; 
+            display: none;
+        }
+        .requirements {
+            text-align: left;
+            font-size: 12px;
+            color: #666;
+            margin: 5px 0 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="signup-box">
+        <h1>Create Account</h1>
+        <p class="subtitle">Join AMAC Therapy</p>
+        
+        <div class="error" id="errorMessage"></div>
+        <div class="success" id="successMessage"></div>
+        
+        <input type="text" id="username" placeholder="Choose a username">
+        <input type="email" id="email" placeholder="Email address">
+        <input type="password" id="password" placeholder="Password">
+        <input type="password" id="confirmPassword" placeholder="Confirm Password">
+        
+        <div class="requirements">
+            • Password must be at least 6 characters<br>
+            • Username must be unique
+        </div>
+        
+        <button onclick="signup()">Create Account</button>
+        
+        <div class="links">
+            <p>Already have an account? <a href="/login">Login here</a></p>
+            <p><a href="/therapy">Continue as Guest</a></p>
+        </div>
+    </div>
+    
+    <script>
+    function showError(message) {
+        document.getElementById('errorMessage').textContent = message;
+        document.getElementById('errorMessage').style.display = 'block';
+        document.getElementById('successMessage').style.display = 'none';
+    }
+    
+    function showSuccess(message) {
+        document.getElementById('successMessage').textContent = message;
+        document.getElementById('successMessage').style.display = 'block';
+        document.getElementById('errorMessage').style.display = 'none';
+    }
+    
+    function clearMessages() {
+        document.getElementById('errorMessage').style.display = 'none';
+        document.getElementById('successMessage').style.display = 'none';
+    }
+    
+    async function signup() {
+        const username = document.getElementById('username').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        
+        // Basic validation
+        if (!username || !email || !password || !confirmPassword) {
+            showError('All fields are required');
+            return;
+        }
+        
+        if (password !== confirmPassword) {
+            showError('Passwords do not match');
+            return;
+        }
+        
+        if (password.length < 6) {
+            showError('Password must be at least 6 characters');
+            return;
+        }
+        
+        try {
+            const response = await fetch('/api/signup', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({username, email, password})
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showSuccess(result.message);
+                
+                // Auto login after successful signup
+                setTimeout(async () => {
+                    try {
+                        const loginResponse = await fetch('/api/login', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({username, password})
+                        });
+                        
+                        const loginResult = await loginResponse.json();
+                        
+                        if (loginResult.success) {
+                            localStorage.setItem('amacLoggedIn', 'true');
+                            localStorage.setItem('amacUsername', username);
+                            window.location.href = '/therapy';
+                        } else {
+                            window.location.href = '/login';
+                        }
+                    } catch (error) {
+                        window.location.href = '/login';
+                    }
+                }, 1500);
+            } else {
+                showError(result.message);
+            }
+        } catch (error) {
+            showError('Network error. Please try again.');
+            console.error('Signup error:', error);
+        }
+    }
+    
+    // Enter key support
+    document.getElementById('confirmPassword').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            clearMessages();
+            signup();
+        }
+    });
+    
+    // Clear messages when typing
+    const inputs = ['username', 'email', 'password', 'confirmPassword'];
+    inputs.forEach(id => {
+        document.getElementById(id).addEventListener('input', clearMessages);
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMAC Speech Therapy</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --success-color: #4cc9f0;
+            --warning-color: #f72585;
+            --light-bg: #f8f9fa;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .therapy-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: none;
+            transition: transform 0.3s;
+        }
+        
+        .therapy-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .progress-ring {
+            width: 120px;
+            height: 120px;
+        }
+        
+        .progress-ring-circle {
+            stroke-width: 8;
+            stroke-linecap: round;
+            fill: transparent;
+        }
+        
+        .exercise-visual {
+            background: linear-gradient(45deg, #4361ee, #3a0ca3);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 10px 0;
+        }
+        
+        .feedback-bubble {
+            background: #e3f2fd;
+            border-radius: 15px;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 5px solid var(--success-color);
+        }
+        
+        .feedback-bubble.warning {
+            background: #ffebee;
+            border-left-color: var(--warning-color);
+        }
+        
+        .real-time-meter {
+            height: 10px;
+            background: #e9ecef;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 0.5s;
+            background: linear-gradient(90deg, #f72585, #4361ee, #4cc9f0);
+        }
+        
+        .avatar-pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .session-timer {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-comment-medical me-2"></i>
+                AMAC Speech Therapy
+            </a>
+            <div class="navbar-text text-light">
+                <span id="userGreeting">Welcome back!</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <!-- Left: Therapy Session -->
+            <div class="col-lg-8">
+                <div class="therapy-card p-4 mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3><i class="fas fa-microphone-alt me-2"></i>Live Therapy Session</h3>
+                        <div class="session-timer" id="sessionTimer">00:00</div>
+                    </div>
+                    
+                    <!-- Video Preview -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="video-container mb-3">
+                                <div class="position-relative">
+                                    <video id="videoPreview" autoplay muted playsinline 
+                                           class="rounded shadow" width="100%"></video>
+                                    <div class="position-absolute top-0 start-0 m-3">
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check-circle me-1"></i>
+                                            <span id="faceStatus">Face Detected</span>
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Real-time Feedback Overlay -->
+                                <div id="realtimeFeedback" class="mt-3">
+                                    <div class="real-time-meter">
+                                        <div id="volumeMeter" class="meter-fill" style="width: 65%"></div>
+                                    </div>
+                                    <small class="text-muted">Volume Level</small>
+                                    
+                                    <div class="real-time-meter mt-2">
+                                        <div id="paceMeter" class="meter-fill" style="width: 45%"></div>
+                                    </div>
+                                    <small class="text-muted">Speech Pace</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Current Exercise -->
+                        <div class="col-md-6">
+                            <div class="exercise-visual" id="currentExercise">
+                                <h4><i class="fas fa-tasks me-2"></i>Current Exercise</h4>
+                                <div class="text-center my-4">
+                                    <div class="display-1 mb-3" id="exerciseTarget">AH</div>
+                                    <p id="exerciseInstructions" class="lead">
+                                        Take a deep breath and say the sound clearly
+                                    </p>
+                                    <div class="mt-4">
+                                        <img id="visualCue" src="mouth_open.png" 
+                                             class="img-fluid rounded" style="max-height: 150px;">
+                                    </div>
+                                </div>
+                                
+                                <div class="text-center mt-4">
+                                    <div class="progress mb-2" style="height: 10px;">
+                                        <div id="exerciseProgress" class="progress-bar bg-success" 
+                                             style="width: 0%"></div>
+                                    </div>
+                                    <small>Exercise Progress</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Session Controls -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="d-grid gap-2 d-md-flex justify-content-center">
+                                <button id="startSessionBtn" onclick="startTherapySession()" 
+                                        class="btn btn-lg btn-success me-2">
+                                    <i class="fas fa-play me-2"></i>Start Session
+                                </button>
+                                <button id="recordBtn" onclick="toggleRecording()" 
+                                        class="btn btn-lg btn-primary me-2" disabled>
+                                    <i class="fas fa-circle me-2"></i>Record Attempt
+                                </button>
+                                <button id="nextExerciseBtn" onclick="nextExercise()" 
+                                        class="btn btn-lg btn-outline-secondary" disabled>
+                                    <i class="fas fa-forward me-2"></i>Next Exercise
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Real-time Feedback -->
+                <div class="therapy-card p-4">
+                    <h4><i class="fas fa-comment-dots me-2"></i>Live Feedback</h4>
+                    <div id="feedbackContainer">
+                        <div class="feedback-bubble">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Start a session to receive real-time feedback
+                        </div>
+                    </div>
+                    
+                    <!-- Clarity Score -->
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="text-center p-3">
+                                <h5>Current Clarity Score</h5>
+                                <div class="position-relative d-inline-block">
+                                    <svg class="progress-ring" id="clarityRing">
+                                        <circle class="progress-ring-circle" stroke="#e9ecef" 
+                                                stroke-width="8" fill="transparent" r="52" cx="60" cy="60"/>
+                                        <circle class="progress-ring-circle" stroke="#4361ee" 
+                                                stroke-width="8" fill="transparent" r="52" cx="60" cy="60" 
+                                                stroke-dasharray="326.56" stroke-dashoffset="163.28"
+                                                id="clarityRingFill"/>
+                                    </svg>
+                                    <div class="position-absolute top-50 start-50 translate-middle">
+                                        <span id="clarityScore" class="display-4 fw-bold">0</span>
+                                        <span class="fs-6">/100</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h5>Articulation Analysis</h5>
+                            <div id="articulationChart" class="mt-3">
+                                <!-- Will be populated with articulation bars -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right: Progress & Profile -->
+            <div class="col-lg-4">
+                <!-- User Profile -->
+                <div class="therapy-card p-4 mb-4">
+                    <div class="text-center">
+                        <div class="avatar-pulse mb-3">
+                            <div class="rounded-circle bg-primary d-inline-flex align-items-center justify-content-center" 
+                                 style="width: 80px; height: 80px;">
+                                <i class="fas fa-user fa-2x text-white"></i>
+                            </div>
+                        </div>
+                        <h4 id="userName">Patient Name</h4>
+                        <div class="badge bg-info mb-2" id="impairmentLevel">Moderate Dysarthria</div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-6">
+                                <div class="p-2">
+                                    <div class="fs-1 fw-bold" id="sessionCount">0</div>
+                                    <small class="text-muted">Sessions</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-2">
+                                    <div class="fs-1 fw-bold" id="dayStreak">0</div>
+                                    <small class="text-muted">Day Streak</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Progress Chart -->
+                <div class="therapy-card p-4 mb-4">
+                    <h5><i class="fas fa-chart-line me-2"></i>Progress Overview</h5>
+                    <div class="mt-3">
+                        <img id="progressChartImg" src="" class="img-fluid" 
+                             alt="Progress chart will appear here">
+                    </div>
+                    <div class="mt-3" id="milestonesList">
+                        <!-- Milestones will appear here -->
+                    </div>
+                </div>
+                
+                <!-- Exercise History -->
+                <div class="therapy-card p-4">
+                    <h5><i class="fas fa-history me-2"></i>Recent Exercises</h5>
+                    <div id="exerciseHistory" class="mt-3">
+                        <div class="list-group">
+                            <!-- Will be populated dynamically -->
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Stats -->
+                    <div class="row mt-4 text-center">
+                        <div class="col-4">
+                            <div class="p-2 bg-light rounded">
+                                <div class="fw-bold text-success" id="bestScore">85</div>
+                                <small>Best Score</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 bg-light rounded">
+                                <div class="fw-bold text-primary" id="avgScore">72</div>
+                                <small>Average</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 bg-light rounded">
+                                <div class="fw-bold text-warning" id="improvement">+12%</div>
+                                <small>Improvement</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // WebSocket connection for real-time therapy
+        let therapyWS = null;
+        let mediaRecorder = null;
+        let sessionActive = false;
+        let sessionTimer = null;
+        let currentSession = null;
+        let secondsElapsed = 0;
+        
+        // DOM Elements
+        const clarityRingFill = document.getElementById('clarityRingFill');
+        const clarityScoreEl = document.getElementById('clarityScore');
+        const volumeMeter = document.getElementById('volumeMeter');
+        const paceMeter = document.getElementById('paceMeter');
+        const exerciseProgress = document.getElementById('exerciseProgress');
+        const feedbackContainer = document.getElementById('feedbackContainer');
+        
+        // Initialize the therapy interface
+        async function initializeTherapy() {
+            // Load user profile
+            const userResponse = await fetch('/api/user/profile');
+            const userData = await userResponse.json();
+            
+            document.getElementById('userName').textContent = userData.name;
+            document.getElementById('impairmentLevel').textContent = userData.impairment_level;
+            document.getElementById('sessionCount').textContent = userData.total_sessions;
+            document.getElementById('dayStreak').textContent = userData.day_streak;
+            
+            // Load progress data
+            const progressResponse = await fetch('/api/user/progress');
+            const progressData = await progressResponse.json();
+            
+            document.getElementById('bestScore').textContent = progressData.best_score;
+            document.getElementById('avgScore').textContent = Math.round(progressData.average_clarity);
+            document.getElementById('improvement').textContent = `+${progressData.improvement_amount}%`;
+            
+            // Load progress chart
+            if (progressData.progress_chart) {
+                document.getElementById('progressChartImg').src = 
+                    `data:image/png;base64,${progressData.progress_chart}`;
+            }
+            
+            // Setup video
+            setupVideoPreview();
+        }
+        
+        // Setup video preview
+        async function setupVideoPreview() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: 640, height: 480 },
+                    audio: true
+                });
+                
+                document.getElementById('videoPreview').srcObject = stream;
+                
+                // Start face detection (simplified)
+                setInterval(() => {
+                    // In production, this would use face detection API
+                    document.getElementById('faceStatus').textContent = 'Face Detected';
+                }, 1000);
+                
+            } catch (err) {
+                console.error('Error accessing media:', err);
+                alert('Please allow camera and microphone access for therapy');
+            }
+        }
+        
+        // Start therapy session
+        async function startTherapySession() {
+            const userId = document.getElementById('userId').value || 'default_user';
+            
+            const response = await fetch('/api/therapy/start', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: userId })
+            });
+            
+            const sessionData = await response.json();
+            currentSession = sessionData;
+            
+            // Enable controls
+            document.getElementById('recordBtn').disabled = false;
+            document.getElementById('startSessionBtn').disabled = true;
+            sessionActive = true;
+            
+            // Start timer
+            startSessionTimer();
+            
+            // Load first exercise
+            loadCurrentExercise();
+            
+            // Initialize WebSocket for real-time feedback
+            initializeWebSocket();
+            
+            // Show success message
+            addFeedback({
+                type: 'success',
+                message: 'Therapy session started! Complete each exercise to improve your speech.'
+            });
+        }
+        
+        // Start session timer
+        function startSessionTimer() {
+            secondsElapsed = 0;
+            sessionTimer = setInterval(() => {
+                secondsElapsed++;
+                const minutes = Math.floor(secondsElapsed / 60);
+                const seconds = secondsElapsed % 60;
+                document.getElementById('sessionTimer').textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+        
+        // Load current exercise
+        async function loadCurrentExercise() {
+            const response = await fetch('/api/therapy/current-exercise');
+            const exercise = await response.json();
+            
+            if (exercise) {
+                document.getElementById('exerciseTarget').textContent = exercise.target;
+                document.getElementById('exerciseInstructions').textContent = exercise.instructions;
+                document.getElementById('visualCue').src = exercise.visual_cue;
+                
+                // Update progress
+                exerciseProgress.style.width = 
+                    `${(exercise.exercise_number / exercise.total_exercises) * 100}%`;
+            }
+        }
+        
+        // Toggle recording
+        async function toggleRecording() {
+            const recordBtn = document.getElementById('recordBtn');
+            
+            if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+                // Start recording
+                const stream = document.getElementById('videoPreview').srcObject;
+                mediaRecorder = new MediaRecorder(stream);
+                
+                mediaRecorder.ondataavailable = async (event) => {
+                    if (event.data.size > 0) {
+                        // Send to server for processing
+                        await processRecording(event.data);
+                    }
+                };
+                
+                mediaRecorder.start();
+                recordBtn.innerHTML = '<i class="fas fa-stop me-2"></i>Stop Recording';
+                recordBtn.classList.remove('btn-primary');
+                recordBtn.classList.add('btn-danger');
+                
+            } else {
+                // Stop recording
+                mediaRecorder.stop();
+                recordBtn.innerHTML = '<i class="fas fa-circle me-2"></i>Record Attempt';
+                recordBtn.classList.remove('btn-danger');
+                recordBtn.classList.add('btn-primary');
+            }
+        }
+        
+        // Process recording
+        async function processRecording(blob) {
+            // Convert blob to base64
+            const reader = new FileReader();
+            reader.onload = async () => {
+                const base64data = reader.result.split(',')[1];
+                
+                // Send to server
+                const response = await fetch('/api/therapy/process-attempt', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        audio_data: base64data,
+                        session_id: currentSession?.session_id
+                    })
+                });
+                
+                const result = await response.json();
+                
+                // Update UI with results
+                updateExerciseResults(result);
+                
+                // If exercise complete, enable next button
+                if (result.exercise_complete) {
+                    document.getElementById('nextExerciseBtn').disabled = false;
+                    addFeedback({
+                        type: 'success',
+                        message: 'Exercise complete! Great work!'
+                    });
+                }
+            };
+            
+            reader.readAsDataURL(blob);
+        }
+        
+        // Update exercise results
+        function updateExerciseResults(result) {
+            // Update clarity score
+            const score = Math.round(result.score);
+            clarityScoreEl.textContent = score;
+            
+            // Update progress ring
+            const circumference = 2 * Math.PI * 52;
+            const offset = circumference - (score / 100) * circumference;
+            clarityRingFill.style.strokeDashoffset = offset;
+            
+            // Update meters
+            volumeMeter.style.width = `${result.volume || 65}%`;
+            paceMeter.style.width = `${result.pace || 45}%`;
+            
+            // Update feedback
+            if (result.feedback) {
+                feedbackContainer.innerHTML = '';
+                result.feedback.points.forEach(point => {
+                    addFeedback({
+                        type: point.includes('needs') ? 'warning' : 'info',
+                        message: point
+                    });
+                });
+                
+                // Add suggestions
+                if (result.feedback.suggestions) {
+                    result.feedback.suggestions.forEach(suggestion => {
+                        addFeedback({
+                            type: 'suggestion',
+                            message: `💡 ${suggestion}`
+                        });
+                    });
+                }
+                
+                // Add encouragement
+                if (result.feedback.encouragement) {
+                    addFeedback({
+                        type: 'encouragement',
+                        message: `🌟 ${result.feedback.encouragement}`
+                    });
+                }
+            }
+        }
+        
+        // Next exercise
+        async function nextExercise() {
+            const response = await fetch('/api/therapy/next-exercise', {
+                method: 'POST'
+            });
+            
+            const result = await response.json();
+            
+            if (result.completed) {
+                // Session complete
+                await endSession();
+            } else {
+                // Load next exercise
+                loadCurrentExercise();
+                document.getElementById('nextExerciseBtn').disabled = true;
+                
+                // Reset feedback for new exercise
+                feedbackContainer.innerHTML = '';
+                addFeedback({
+                    type: 'info',
+                    message: 'New exercise loaded. Give it a try!'
+                });
+            }
+        }
+        
+        // End session
+        async function endSession() {
+            const response = await fetch('/api/therapy/end-session', {
+                method: 'POST'
+            });
+            
+            const summary = await response.json();
+            
+            // Stop timer
+            clearInterval(sessionTimer);
+            
+            // Show session summary
+            alert(`Session complete!\n\nAverage Score: ${summary.average_clarity}\nImprovement: ${summary.improvement_percentage}%`);
+            
+            // Reset UI
+            document.getElementById('startSessionBtn').disabled = false;
+            document.getElementById('recordBtn').disabled = true;
+            document.getElementById('nextExerciseBtn').disabled = true;
+            sessionActive = false;
+            
+            // Reload progress data
+            initializeTherapy();
+        }
+        
+        // Initialize WebSocket for real-time feedback
+        function initializeWebSocket() {
+            therapyWS = new WebSocket(`ws://${window.location.host}/therapy-ws`);
+            
+            therapyWS.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                
+                if (data.type === 'real_time_metrics') {
+                    // Update real-time metrics
+                    volumeMeter.style.width = `${data.volume}%`;
+                    paceMeter.style.width = `${data.pace}%`;
+                }
+            };
+        }
+        
+        // Add feedback message
+        function addFeedback({ type, message }) {
+            const bubble = document.createElement('div');
+            bubble.className = `feedback-bubble ${type === 'warning' ? 'warning' : ''}`;
+            
+            let icon = 'fa-info-circle';
+            if (type === 'success') icon = 'fa-check-circle';
+            if (type === 'warning') icon = 'fa-exclamation-triangle';
+            if (type === 'encouragement') icon = 'fa-star';
+            
+            bubble.innerHTML = `
+                <i class="fas ${icon} me-2"></i>
+                ${message}
+            `;
+            
+            feedbackContainer.prepend(bubble);
+            
+            // Limit to 5 messages
+            const bubbles = feedbackContainer.getElementsByClassName('feedback-bubble');
+            if (bubbles.length > 5) {
+                bubbles[bubbles.length - 1].remove();
+            }
+        }
+        
+        // Generate articulation chart
+        function generateArticulationChart(articulationData) {
+            const chartDiv = document.getElementById('articulationChart');
+            chartDiv.innerHTML = '';
+            
+            for (const [sound, score] of Object.entries(articulationData)) {
+                const bar = document.createElement('div');
+                bar.className = 'mb-2';
+                bar.innerHTML = `
+                    <div class="d-flex justify-content-between mb-1">
+                        <small>${sound}</small>
+                        <small>${Math.round(score * 100)}%</small>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar" role="progressbar" 
+                             style="width: ${score * 100}%;"></div>
+                    </div>
+                `;
+                chartDiv.appendChild(bar);
+            }
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', initializeTherapy);
+    </script>
+</body>
+</html>

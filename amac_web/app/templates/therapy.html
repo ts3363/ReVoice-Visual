@@ -1,0 +1,30 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>AMAC Therapy</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>AMAC Speech Therapy</h1>
+        <div class="video-container">
+            <video id="camera" autoplay muted width="640" height="480"></video>
+            <div class="controls">
+                <button id="start">Start Session</button>
+                <button id="stop" disabled>Stop</button>
+                <button id="record">Record</button>
+            </div>
+        </div>
+        <div class="feedback">
+            <h3>Feedback</h3>
+            <div id="feedback-text">Ready to start session...</div>
+            <div class="metrics">
+                <div>Articulation: <span id="articulation">0%</span></div>
+                <div>Fluency: <span id="fluency">0%</span></div>
+                <div>Phoneme Accuracy: <span id="phoneme">0%</span></div>
+            </div>
+        </div>
+    </div>
+    <script src="/static/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+# Ignore Python cache
+__pycache__/
+*.pyc
+
+# Ignore Virtual Environments
+env/
+venv/
+.env
+.venv/
+
+# Ignore Data and Videos
+*.mp4
+*.avi
+*.mpg
+data/
+
+# Ignore VS Code settings
+.vscode/
+
+# Ignore Large Model Weights (initially)
+*.pth
+*.pt
+weights/
+
+# Virtual environments
+venv/
+.venv/
+env/
+dysarthria_env/
+
+# Python cache
+__pycache__/
+*.pyc

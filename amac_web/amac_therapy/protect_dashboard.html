@@ -1,0 +1,67 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>AMAC Therapy Dashboard Protection</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        code { background: #f5f5f5; padding: 10px; display: block; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>How to Protect Your AMAC Therapy Dashboard</h1>
+    
+    <h2>Option 1: Add this to your dashboard HTML (before &lt;/body&gt;)</h2>
+    <code>
+&lt;script&gt;
+// Login check for AMAC Therapy
+(function() {
+    const isLoggedIn = localStorage.getItem('amacLoggedIn') || sessionStorage.getItem('amacLoggedIn');
+    if (!isLoggedIn) {
+        window.location.href = 'login.html';
+    }
+    
+    // Add logout button
+    const logoutBtn = document.createElement('button');
+    logoutBtn.textContent = 'Logout';
+    logoutBtn.style.cssText = \
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #2c5aa0;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        z-index: 1000;
+        font-weight: bold;
+    \;
+    logoutBtn.onclick = function() {
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location.href = 'login.html';
+    };
+    document.body.appendChild(logoutBtn);
+})();
+&lt;/script&gt;
+    </code>
+    
+    <h2>Option 2: Use a meta redirect in your dashboard</h2>
+    <code>
+&lt;!-- Add this at the very top of your dashboard HTML --&gt;
+&lt;script&gt;
+if (!localStorage.getItem('amacLoggedIn') && !sessionStorage.getItem('amacLoggedIn')) {
+    window.location.href = 'login.html';
+}
+&lt;/script&gt;
+    </code>
+    
+    <p><strong>Steps:</strong></p>
+    <ol>
+        <li>Open your dashboard HTML file (probably index.html or similar)</li>
+        <li>Add Option 1 code just before &lt;/body&gt; tag</li>
+        <li>Save and refresh</li>
+        <li>Now users must login first!</li>
+    </ol>
+</body>
+</html>

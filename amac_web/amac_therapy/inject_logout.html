@@ -1,0 +1,49 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>AMAC Therapy Logout Helper</title>
+    <script>
+        // This script can be injected into your dashboard
+        function injectLogoutButton() {
+            if (!document.getElementById('amacLogoutBtn')) {
+                const btn = document.createElement('button');
+                btn.id = 'amacLogoutBtn';
+                btn.textContent = 'Logout';
+                btn.style.cssText = \
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: #2c5aa0;
+                    color: white;
+                    border: none;
+                    padding: 10px 20px;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    z-index: 9999;
+                    font-weight: bold;
+                \;
+                
+                btn.onclick = function() {
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    window.location.href = 'login.html';
+                };
+                
+                document.body.appendChild(btn);
+            }
+        }
+        
+        // Inject on page load
+        window.addEventListener('load', injectLogoutButton);
+        
+        // Check login status
+        if (!localStorage.getItem('amacLoggedIn') && !sessionStorage.getItem('amacLoggedIn')) {
+            window.location.href = 'login.html';
+        }
+    </script>
+</head>
+<body>
+    <h1>AMAC Therapy Logout Injection</h1>
+    <p>Copy the script above and add it to your dashboard HTML file.</p>
+</body>
+</html>

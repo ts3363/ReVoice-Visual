@@ -1,0 +1,23 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>AMAC Therapy Logout Bookmarklet</title>
+</head>
+<body>
+    <h1>AMAC Therapy Logout Bookmarklet</h1>
+    <p>Drag this link to your bookmarks bar:</p>
+    <a href="javascript:(function(){
+        if(confirm('Logout from AMAC Therapy?')){
+            localStorage.removeItem('amacLoggedIn');
+            localStorage.removeItem('amacUsername');
+            sessionStorage.clear();
+            window.location.href='login.html';
+        }
+    })();">AMAC Logout</a>
+    
+    <p>Or create a new bookmark with this URL:</p>
+    <code>
+        javascript:(function(){if(confirm('Logout from AMAC Therapy?')){localStorage.removeItem('amacLoggedIn');localStorage.removeItem('amacUsername');sessionStorage.clear();window.location.href='login.html';}})();
+    </code>
+</body>
+</html>

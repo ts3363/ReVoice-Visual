@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMAC Therapy - Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        
+        body {
+            background-color: #f0f7ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .login-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo h1 {
+            color: #2c5aa0;
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+        
+        .logo p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e7ff;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #2c5aa0;
+            box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
+        }
+        
+        .password-container {
+            position: relative;
+        }
+        
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .login-btn {
+            width: 100%;
+            background-color: #2c5aa0;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+        
+        .login-btn:hover {
+            background-color: #1e4280;
+        }
+        
+        .links {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .links a {
+            color: #2c5aa0;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .links a:hover {
+            text-decoration: underline;
+        }
+        
+        .error {
+            background-color: #ffeaea;
+            color: #e63946;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+        }
+        
+        .remember {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <h1>AMAC Therapy</h1>
+            <p>Speech Improvement System</p>
+        </div>
+        
+        <div class="error" id="errorMessage">
+            Invalid username or password
+        </div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" class="form-control" placeholder="Enter your username" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="password-container">
+                    <input type="password" id="password" class="form-control" placeholder="Enter your password" required>
+                    <button type="button" class="toggle-password" id="togglePassword">Show</button>
+                </div>
+            </div>
+            
+            <div class="remember">
+                <input type="checkbox" id="rememberMe">
+                <label for="rememberMe">Remember me</label>
+            </div>
+            
+            <button type="submit" class="login-btn">Login to Dashboard</button>
+        </form>
+        
+        <div class="links">
+            <p>Don't have an account? <a href="signup.html">Sign up</a></p>
+            <p>Or <a href="http://localhost:8000">Continue as Guest</a> (Limited access)</p>
+        </div>
+    </div>
+
+    <script>
+        // Toggle password visibility
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const passwordInput = document.getElementById('password');
+            const type = passwordInput.type === 'password' ? 'text' : 'password';
+            passwordInput.type = type;
+            this.textContent = type === 'password' ? 'Show' : 'Hide';
+        });
+        
+        // Form submission
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
+            
+            // Demo credentials - Replace with your actual authentication
+            if ((username === 'testuser' && password === 'amac2024') || 
+                (username === 'admin' && password === 'admin123')) {
+                
+                // Store login state
+                if (rememberMe) {
+                    localStorage.setItem('amacLoggedIn', 'true');
+                    localStorage.setItem('amacUsername', username);
+                } else {
+                    sessionStorage.setItem('amacLoggedIn', 'true');
+                    sessionStorage.setItem('amacUsername', username);
+                }
+                
+                // Redirect to your AMAC Therapy dashboard
+                window.location.href = 'http://localhost:8000';
+            } else {
+                document.getElementById('errorMessage').style.display = 'block';
+            }
+        });
+        
+        // Check if already logged in
+        window.addEventListener('DOMContentLoaded', function() {
+            const isLoggedIn = localStorage.getItem('amacLoggedIn') || sessionStorage.getItem('amacLoggedIn');
+            
+            if (isLoggedIn) {
+                // Auto-redirect to dashboard if already logged in
+                window.location.href = 'http://localhost:8000';
+            }
+            
+            // Auto-fill demo credentials for testing
+            document.getElementById('username').value = 'testuser';
+            document.getElementById('password').value = 'amac2024';
+        });
+    </script>
+</body>
+</html>
+// After successful login, redirect to your dashboard
+if (username === 'testuser' && password === 'amac2024') {
+    // Store login state
+    if (rememberMe) {
+        localStorage.setItem('amacLoggedIn', 'true');
+        localStorage.setItem('amacUsername', username);
+    } else {
+        sessionStorage.setItem('amacLoggedIn', 'true');
+        sessionStorage.setItem('amacUsername', username);
+    }
+    
+    // Redirect to your AMAC Therapy dashboard
+    
+    // Try option 1:
+    window.location.href = 'http://localhost:8000/therapy';
+
+    // Or option 2:
+    window.location.href = 'http://localhost:8000/static/therapy.html';
+
+    // Or option 3:
+    window.location.href = '/therapy';
+
+    // Or option 4:
+    window.location.href = '/static/therapy.html';
+}

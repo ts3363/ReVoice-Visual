@@ -1,0 +1,831 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>AMAC - Real-time Dysarthria Analysis</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --text: #2c3e50;
+            --bg: #ecf0f1;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        .terminal-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #1a1a1a;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .terminal-header {
+            background: #333;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #444;
+        }
+        
+        .terminal-dots {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .dot-red { background: #ff5f56; }
+        .dot-yellow { background: #ffbd2e; }
+        .dot-green { background: #27ca3f; }
+        
+        .terminal-title {
+            color: #888;
+            margin-left: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .terminal-body {
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            line-height: 1.8;
+            min-height: 500px;
+            max-height: 700px;
+            overflow-y: auto;
+            background: #1a1a1a;
+            color: #00ff00;
+        }
+        
+        .terminal-line {
+            margin: 10px 0;
+            padding: 5px 0;
+            border-bottom: 1px solid #333;
+        }
+        
+        .label {
+            color: #3498db;
+            font-weight: bold;
+            display: inline-block;
+            width: 100px;
+        }
+        
+        .real-text {
+            color: #ffffff;
+            font-weight: bold;
+        }
+        
+        .pred-text {
+            color: #e74c3c;
+        }
+        
+        .good {
+            color: #27ae60;
+        }
+        
+        .warning {
+            color: #f39c12;
+        }
+        
+        .bad {
+            color: #e74c3c;
+        }
+        
+        .feedback-item {
+            color: #9b59b6;
+            margin-left: 20px;
+        }
+        
+        .separator {
+            color: #7f8c8d;
+            text-align: center;
+            margin: 20px 0;
+            letter-spacing: 5px;
+        }
+        
+        .controls {
+            background: #2c3e50;
+            padding: 15px 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-start {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .btn-stop {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .btn-record {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn:disabled {
+            background: #7f8c8d;
+            cursor: not-allowed;
+        }
+        
+        .metrics-panel {
+            background: #2c3e50;
+            padding: 15px 20px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            border-top: 1px solid #34495e;
+        }
+        
+        .metric {
+            background: #34495e;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #3498db;
+            margin: 5px 0;
+        }
+        
+        .metric-label {
+            color: #bdc3c7;
+            font-size: 12px;
+        }
+        
+        .session-info {
+            background: #34495e;
+            padding: 10px 20px;
+            color: #bdc3c7;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .blink {
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .typing {
+            display: inline-block;
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 2px solid #00ff00;
+            animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+        }
+        
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+        
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: #00ff00; }
+        }
+        
+        .audio-visualizer {
+            height: 60px;
+            background: #2c3e50;
+            margin: 10px 0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .visualizer-canvas {
+            width: 100%;
+            height: 100%;
+        }
+        
+        @media (max-width: 768px) {
+            .metrics-panel {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .terminal-body {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal-container">
+        <div class="terminal-header">
+            <div class="terminal-dots">
+                <div class="dot dot-red"></div>
+                <div class="dot dot-yellow"></div>
+                <div class="dot dot-green"></div>
+            </div>
+            <div class="terminal-title">AMAC Dysarthria Analysis Terminal v1.0</div>
+        </div>
+        
+        <div class="session-info">
+            <div>
+                <span id="sessionStatus" class="blink">● READY</span>
+                <span id="sessionId"> | Session: --</span>
+            </div>
+            <div>
+                <span id="utteranceCount">Utterances: 0</span>
+                <span> | </span>
+                <span id="sessionTimer">Time: 00:00</span>
+            </div>
+        </div>
+        
+        <div class="audio-visualizer">
+            <canvas id="audioVisualizer" class="visualizer-canvas"></canvas>
+        </div>
+        
+        <div class="terminal-body" id="terminalOutput">
+            <div class="terminal-line typing">
+                Initializing AMAC Dysarthria Analysis System...
+            </div>
+            <div class="terminal-line">
+                <span class="label">STATUS:</span>
+                <span class="good">System Ready</span>
+            </div>
+            <div class="terminal-line">
+                <span class="label">MODEL:</span>
+                <span>Whisper + Adaptive Feedback Engine</span>
+            </div>
+            <div class="separator">------------------------------------------------------------</div>
+            
+            <!-- Example lines will be added here dynamically -->
+            <div class="terminal-line">
+                <span class="label">EXAMPLE:</span>
+            </div>
+            <div class="terminal-line">
+                <span class="label">REAL :</span>
+                <span class="real-text">bin blue at b eight now</span>
+            </div>
+            <div class="terminal-line">
+                <span class="label">PRED :</span>
+                <span class="pred-text">gkzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzkcc</span>
+            </div>
+            <div class="terminal-line">
+                <span class="label">CLARITY:</span>
+                <span class="bad">0.0</span>
+            </div>
+            <div class="terminal-line">
+                <span class="label">FEEDBACK:</span>
+                <div class="feedback-item">Slow down speech</div>
+                <div class="feedback-item">Over-articulate consonants</div>
+            </div>
+            <div class="separator">------------------------------------------------------------</div>
+            
+            <div class="terminal-line" id="liveOutput">
+                <span class="label blink">LIVE:</span>
+                <span>Waiting for audio input...</span>
+            </div>
+        </div>
+        
+        <div class="metrics-panel">
+            <div class="metric">
+                <div class="metric-value" id="clarityScore">--%</div>
+                <div class="metric-label">Clarity</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value" id="articulationScore">--%</div>
+                <div class="metric-label">Articulation</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value" id="fluencyScore">--%</div>
+                <div class="metric-label">Fluency</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value" id="phonemeScore">--%</div>
+                <div class="metric-label">Phoneme Acc</div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn btn-start" id="startBtn" onclick="startSession()">
+                ▶ START SESSION
+            </button>
+            <button class="btn btn-stop" id="stopBtn" onclick="stopSession()" disabled>
+                ⏹ STOP SESSION
+            </button>
+            <button class="btn btn-record" id="recordBtn" onclick="toggleRecording()" disabled>
+                ● RECORD UTTERANCE
+            </button>
+            <button class="btn" onclick="clearTerminal()">
+                ⎚ CLEAR TERMINAL
+            </button>
+            <button class="btn" onclick="showExercises()">
+                📝 EXERCISES
+            </button>
+            <button class="btn" onclick="exportSession()">
+                💾 EXPORT DATA
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        class RealtimeDysarthriaTerminal {
+            constructor() {
+                this.sessionActive = false;
+                this.recordingActive = false;
+                this.mediaStream = null;
+                this.audioContext = null;
+                this.analyser = null;
+                this.websocket = null;
+                this.sessionTimer = 0;
+                this.timerInterval = null;
+                this.utteranceCount = 0;
+                this.sessionId = null;
+                
+                this.terminal = document.getElementById('terminalOutput');
+                this.liveOutput = document.getElementById('liveOutput');
+                this.startBtn = document.getElementById('startBtn');
+                this.stopBtn = document.getElementById('stopBtn');
+                this.recordBtn = document.getElementById('recordBtn');
+                this.visualizerCanvas = document.getElementById('audioVisualizer');
+                
+                this.initAudioVisualizer();
+                this.initWebSocket();
+            }
+            
+            initAudioVisualizer() {
+                this.visualizerCtx = this.visualizerCanvas.getContext('2d');
+                this.visualizerCanvas.width = this.visualizerCanvas.offsetWidth;
+                this.visualizerCanvas.height = this.visualizerCanvas.offsetHeight;
+            }
+            
+            initWebSocket() {
+                const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                this.websocket = new WebSocket(`${protocol}//${window.location.host}/api/realtime/ws`);
+                
+                this.websocket.onopen = () => {
+                    this.logToTerminal('WebSocket connected to analysis server', 'good');
+                };
+                
+                this.websocket.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    this.handleRealtimeData(data);
+                };
+                
+                this.websocket.onerror = (error) => {
+                    this.logToTerminal(`WebSocket error: ${error.message}`, 'bad');
+                };
+            }
+            
+            async startSession() {
+                try {
+                    // Start audio context
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    
+                    // Get microphone access
+                    this.mediaStream = await navigator.mediaDevices.getUserMedia({
+                        audio: {
+                            sampleRate: 16000,
+                            channelCount: 1,
+                            echoCancellation: true,
+                            noiseSuppression: true
+                        },
+                        video: false
+                    });
+                    
+                    // Setup audio processing
+                    const source = this.audioContext.createMediaStreamSource(this.mediaStream);
+                    this.analyser = this.audioContext.createAnalyser();
+                    this.analyser.fftSize = 2048;
+                    source.connect(this.analyser);
+                    
+                    // Start audio visualization
+                    this.visualizeAudio();
+                    
+                    // Start session on server
+                    this.sessionId = 'session_' + Date.now();
+                    this.sendToServer('start_session', { sessionId: this.sessionId });
+                    
+                    // Update UI
+                    this.sessionActive = true;
+                    this.startBtn.disabled = true;
+                    this.stopBtn.disabled = false;
+                    this.recordBtn.disabled = false;
+                    
+                    // Start session timer
+                    this.startTimer();
+                    
+                    // Update session info
+                    document.getElementById('sessionStatus').textContent = '● LIVE';
+                    document.getElementById('sessionStatus').className = 'good';
+                    document.getElementById('sessionId').textContent = ` | Session: ${this.sessionId.substring(0, 8)}`;
+                    
+                    this.logToTerminal(`Session ${this.sessionId} started`, 'good');
+                    this.logToTerminal('Ready for speech analysis. Click RECORD UTTERANCE to begin.', 'warning');
+                    
+                } catch (error) {
+                    this.logToTerminal(`Error starting session: ${error.message}`, 'bad');
+                }
+            }
+            
+            startTimer() {
+                this.sessionTimer = 0;
+                this.timerInterval = setInterval(() => {
+                    this.sessionTimer++;
+                    const minutes = Math.floor(this.sessionTimer / 60);
+                    const seconds = this.sessionTimer % 60;
+                    document.getElementById('sessionTimer').textContent = 
+                        `Time: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                }, 1000);
+            }
+            
+            visualizeAudio() {
+                const bufferLength = this.analyser.frequencyBinCount;
+                const dataArray = new Uint8Array(bufferLength);
+                const canvas = this.visualizerCanvas;
+                const ctx = this.visualizerCtx;
+                
+                const draw = () => {
+                    if (!this.sessionActive) return;
+                    
+                    requestAnimationFrame(draw);
+                    
+                    this.analyser.getByteFrequencyData(dataArray);
+                    
+                    // Clear canvas
+                    ctx.fillStyle = '#2c3e50';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    
+                    // Draw bars
+                    const barWidth = (canvas.width / bufferLength) * 2.5;
+                    let barHeight;
+                    let x = 0;
+                    
+                    for (let i = 0; i < bufferLength; i++) {
+                        barHeight = dataArray[i] / 2;
+                        
+                        // Color based on frequency (simulating dysarthria analysis)
+                        const hue = 120 + (dataArray[i] / 255 * 120); // Green to red
+                        ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
+                        
+                        ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+                        
+                        x += barWidth + 1;
+                    }
+                };
+                
+                draw();
+            }
+            
+            toggleRecording() {
+                if (!this.recordingActive) {
+                    this.startRecording();
+                } else {
+                    this.stopRecording();
+                }
+            }
+            
+            startRecording() {
+                this.recordingActive = true;
+                this.recordBtn.textContent = '⏹ STOP RECORDING';
+                this.recordBtn.style.background = '#e74c3c';
+                
+                this.logToTerminal('Recording started... Speak clearly now.', 'warning');
+                this.liveOutput.innerHTML = '<span class="label blink">LIVE:</span> <span class="real-text">Listening...</span>';
+                
+                // Start sending audio data
+                this.startAudioStreaming();
+            }
+            
+            stopRecording() {
+                this.recordingActive = false;
+                this.recordBtn.textContent = '● RECORD UTTERANCE';
+                this.recordBtn.style.background = '#3498db';
+                
+                this.logToTerminal('Recording stopped. Analyzing...', 'warning');
+                this.liveOutput.innerHTML = '<span class="label">LIVE:</span> <span>Processing audio...</span>';
+                
+                // Stop audio streaming
+                if (this.audioProcessor) {
+                    this.audioProcessor.disconnect();
+                }
+                
+                // Send end of utterance
+                this.sendToServer('end_utterance', {});
+            }
+            
+            startAudioStreaming() {
+                if (!this.audioContext || !this.mediaStream) return;
+                
+                const source = this.audioContext.createMediaStreamSource(this.mediaStream);
+                this.audioProcessor = this.audioContext.createScriptProcessor(4096, 1, 1);
+                
+                let audioBuffer = [];
+                const bufferDuration = 2; // seconds
+                const bufferSize = 16000 * bufferDuration; // 16kHz * 2 seconds
+                
+                this.audioProcessor.onaudioprocess = (e) => {
+                    if (!this.recordingActive) return;
+                    
+                    const audioData = e.inputBuffer.getChannel(0);
+                    
+                    // Collect audio data
+                    audioBuffer.push(...Array.from(audioData));
+                    
+                    // Send chunk when buffer is full
+                    if (audioBuffer.length >= bufferSize) {
+                        const chunk = audioBuffer.slice(0, bufferSize);
+                        audioBuffer = audioBuffer.slice(bufferSize);
+                        
+                        this.sendToServer('audio_chunk', {
+                            audio: chunk,
+                            sampleRate: 16000
+                        });
+                    }
+                };
+                
+                source.connect(this.audioProcessor);
+                this.audioProcessor.connect(this.audioContext.destination);
+            }
+            
+            sendToServer(type, data) {
+                if (this.websocket && this.websocket.readyState === WebSocket.OPEN) {
+                    this.websocket.send(JSON.stringify({
+                        type: type,
+                        sessionId: this.sessionId,
+                        timestamp: Date.now(),
+                        ...data
+                    }));
+                }
+            }
+            
+            handleRealtimeData(data) {
+                switch (data.type) {
+                    case 'analysis_result':
+                        this.displayAnalysis(data.analysis);
+                        this.updateMetrics(data.analysis);
+                        this.utteranceCount++;
+                        document.getElementById('utteranceCount').textContent = 
+                            `Utterances: ${this.utteranceCount}`;
+                        break;
+                        
+                    case 'realtime_feedback':
+                        this.updateLiveFeedback(data.feedback);
+                        break;
+                        
+                    case 'session_summary':
+                        this.displaySessionSummary(data.summary);
+                        break;
+                        
+                    case 'error':
+                        this.logToTerminal(`Error: ${data.message}`, 'bad');
+                        break;
+                }
+            }
+            
+            displayAnalysis(analysis) {
+                // Create new terminal entry
+                const entry = document.createElement('div');
+                entry.className = 'terminal-entry';
+                
+                // Format like your example
+                const realText = analysis.real_text || "[No reference]";
+                const predText = analysis.predicted_text;
+                const clarity = (analysis.clarity_score * 100).toFixed(1);
+                const feedback = analysis.feedback_messages || [];
+                
+                // Determine clarity color
+                let clarityClass = 'bad';
+                if (analysis.clarity_score > 0.6) clarityClass = 'good';
+                else if (analysis.clarity_score > 0.3) clarityClass = 'warning';
+                
+                let html = `
+                    <div class="terminal-line">
+                        <span class="label">REAL :</span>
+                        <span class="real-text">${realText}</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="label">PRED :</span>
+                        <span class="pred-text">${predText}</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="label">CLARITY:</span>
+                        <span class="${clarityClass}">${clarity}</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="label">FEEDBACK:</span>
+                `;
+                
+                // Add feedback items
+                feedback.forEach(fb => {
+                    html += `<div class="feedback-item">${fb}</div>`;
+                });
+                
+                html += `</div><div class="separator">------------------------------------------------------------</div>`;
+                
+                entry.innerHTML = html;
+                
+                // Add to terminal (at the end, before live output)
+                const liveOutput = document.getElementById('liveOutput');
+                this.terminal.insertBefore(entry, liveOutput);
+                
+                // Scroll to bottom
+                this.terminal.scrollTop = this.terminal.scrollHeight;
+                
+                // Update live output
+                this.liveOutput.innerHTML = `
+                    <span class="label">LIVE:</span>
+                    <span class="good">Analysis complete. Clarity: ${clarity}%</span>
+                `;
+            }
+            
+            updateMetrics(analysis) {
+                // Update metric displays
+                document.getElementById('clarityScore').textContent = 
+                    `${(analysis.clarity_score * 100).toFixed(0)}%`;
+                document.getElementById('articulationScore').textContent = 
+                    `${(analysis.articulation_score * 100).toFixed(0)}%`;
+                document.getElementById('fluencyScore').textContent = 
+                    `${(analysis.fluency_score * 100).toFixed(0)}%`;
+                document.getElementById('phonemeScore').textContent = 
+                    `${(analysis.phoneme_accuracy * 100).toFixed(0)}%`;
+                
+                // Color code based on scores
+                this.updateMetricColor('clarityScore', analysis.clarity_score);
+                this.updateMetricColor('articulationScore', analysis.articulation_score);
+                this.updateMetricColor('fluencyScore', analysis.fluency_score);
+                this.updateMetricColor('phonemeScore', analysis.phoneme_accuracy);
+            }
+            
+            updateMetricColor(elementId, score) {
+                const element = document.getElementById(elementId);
+                if (score > 0.7) {
+                    element.style.color = '#27ae60'; // Green
+                } else if (score > 0.4) {
+                    element.style.color = '#f39c12'; // Yellow
+                } else {
+                    element.style.color = '#e74c3c'; // Red
+                }
+            }
+            
+            updateLiveFeedback(feedback) {
+                this.liveOutput.innerHTML = `
+                    <span class="label blink">LIVE:</span>
+                    <span>${feedback}</span>
+                `;
+            }
+            
+            displaySessionSummary(summary) {
+                this.logToTerminal('Session Summary:', 'good');
+                this.logToTerminal(`Total Utterances: ${summary.total_utterances}`);
+                this.logToTerminal(`Average Clarity: ${(summary.avg_clarity * 100).toFixed(1)}%`);
+                this.logToTerminal(`Average Articulation: ${(summary.avg_articulation * 100).toFixed(1)}%`);
+                
+                if (summary.improvement_trend && summary.improvement_trend.length > 2) {
+                    const improvement = summary.improvement_trend[2];
+                    const trend = improvement > 0 ? '↑' : '↓';
+                    this.logToTerminal(`Improvement Trend: ${Math.abs(improvement).toFixed(1)}% ${trend}`);
+                }
+                
+                this.logToTerminal('Recommended Exercises:', 'good');
+                if (summary.recommended_exercises) {
+                    summary.recommended_exercises.forEach(ex => {
+                        this.logToTerminal(`• ${ex.description}`);
+                    });
+                }
+                
+                this.logToTerminal('Session ended. Thank you for practicing!', 'good');
+            }
+            
+            logToTerminal(message, type = '') {
+                const line = document.createElement('div');
+                line.className = 'terminal-line';
+                
+                const now = new Date();
+                const timestamp = `[${now.getHours().toString().padStart(2, '0')}:` +
+                                 `${now.getMinutes().toString().padStart(2, '0')}:` +
+                                 `${now.getSeconds().toString().padStart(2, '0')}]`;
+                
+                let html = `<span class="label">${timestamp}</span> `;
+                
+                if (type === 'good') {
+                    html += `<span class="good">${message}</span>`;
+                } else if (type === 'warning') {
+                    html += `<span class="warning">${message}</span>`;
+                } else if (type === 'bad') {
+                    html += `<span class="bad">${message}</span>`;
+                } else {
+                    html += `<span>${message}</span>`;
+                }
+                
+                line.innerHTML = html;
+                
+                // Add before live output
+                const liveOutput = document.getElementById('liveOutput');
+                this.terminal.insertBefore(line, liveOutput);
+                
+                // Scroll to bottom
+                this.terminal.scrollTop = this.terminal.scrollHeight;
+            }
+            
+            stopSession() {
+                // Stop audio
+                if (this.mediaStream) {
+                    this.mediaStream.getTracks().forEach(track => track.stop());
+                }
+                
+                // Stop timer
+                if (this.timerInterval) {
+                    clearInterval(this.timerInterval);
+                }
+                
+                // Stop audio processing
+                if (this.audioProcessor) {
+                    this.audioProcessor.disconnect();
+                }
+                
+                // Send session end
+                this.sendToServer('end_session', {});
+                
+                // Update UI
+                this.sessionActive = false;
+                this.recordingActive = false;
+                this.startBtn.disabled = false;
+                this.stopBtn.disabled = true;
+                this.recordBtn.disabled = true;
+                this.recordBtn.textContent = '● RECORD UTTERANCE';
+                this.recordBtn.style.background = '#3498db';
+                
+                document.getElementById('sessionStatus').textContent = '● ENDED';
+                document.getElementById('sessionStatus').className = 'bad';
+                
+                this.logToTerminal('Session stopped. Generating summary...', 'warning');
+            }
+            
+            clearTerminal() {
+                // Keep only the first few lines (headers)
+                const lines = this.terminal.querySelectorAll('.terminal-line, .terminal-entry, .separator');
+                const keepCount = 8; // Keep headers and example
+                
+                for (let i = keepCount; i < lines.length; i++) {
+                    if (lines[i].id !== 'liveOutput') {
+                        lines[i].remove();
+                    }
+                }
+                
+                this.logToTerminal('Terminal cleared.', 'warning');
+            }
+            
+            showExercises() {
+                this.sendToServer('get_exercises', {});
+            }
+            
+            exportSession() {
+                this.sendToServer('export_data', { sessionId: this.sessionId });
+                this.logToTerminal('Export requested. Data will be downloaded shortly.', 'good');
+            }
+        }
+        
+        // Initialize terminal
+        document.addEventListener('DOMContentLoaded', () => {
+            window.terminal = new RealtimeDysarthriaTerminal();
+            
+            // Global functions for buttons
+            window.startSession = () => terminal.startSession();
+            window.stopSession = () => terminal.stopSession();
+            window.toggleRecording = () => terminal.toggleRecording();
+            window.clearTerminal = () => terminal.clearTerminal();
+            window.showExercises = () => terminal.showExercises();
+            window.exportSession = () => terminal.exportSession();
+        });
+    </script>
+</body>
+</html>

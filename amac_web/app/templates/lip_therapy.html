@@ -1,0 +1,901 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>AMAC Lip Therapy for Dysarthria</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #4299e1 0%, #667eea 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #2b6cb0;
+            font-size: 2.5rem;
+            margin: 0;
+        }
+        
+        .header .subtitle {
+            color: #4a5568;
+            font-size: 1.2rem;
+            margin-top: 10px;
+        }
+        
+        .therapy-section {
+            display: grid;
+            grid-template-columns: 3fr 2fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        .visualization-area {
+            background: #1a202c;
+            border-radius: 10px;
+            padding: 20px;
+            position: relative;
+        }
+        
+        .camera-feed {
+            width: 100%;
+            height: 400px;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        #cameraVideo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .lip-canvas-container {
+            background: #2d3748;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        #lipCanvas {
+            background: #4a5568;
+            border-radius: 5px;
+            width: 100%;
+            height: 200px;
+        }
+        
+        .analysis-panel {
+            background: #f7fafc;
+            border-radius: 10px;
+            padding: 25px;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .analysis-panel h3 {
+            color: #2b6cb0;
+            margin-top: 0;
+            border-bottom: 2px solid #2b6cb0;
+            padding-bottom: 10px;
+        }
+        
+        .lip-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .metric {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #4299e1;
+        }
+        
+        .metric-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2b6cb0;
+            margin: 5px 0;
+        }
+        
+        .metric-label {
+            color: #4a5568;
+            font-size: 0.9rem;
+        }
+        
+        .feedback-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            min-height: 120px;
+            border-left: 4px solid #48bb78;
+            margin: 20px 0;
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+        
+        .phoneme-practice {
+            background: #ebf8ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 2px solid #4299e1;
+        }
+        
+        .phoneme-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .phoneme-btn {
+            background: #4299e1;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .phoneme-btn:hover {
+            background: #3182ce;
+            transform: translateY(-2px);
+        }
+        
+        .phoneme-btn.active {
+            background: #2c5282;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: #4299e1;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #3182ce;
+        }
+        
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #f56565;
+            color: white;
+        }
+        
+        .btn:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+        }
+        
+        .exercise-list {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+        
+        .exercise-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 4px solid #48bb78;
+        }
+        
+        @media (max-width: 1024px) {
+            .therapy-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .phoneme-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>👄 Lip Movement Therapy for Dysarthria</h1>
+            <div class="subtitle">
+                Visual feedback system for improving lip articulation in motor speech disorders
+            </div>
+        </div>
+        
+        <div class="therapy-section">
+            <div class="visualization-area">
+                <div class="camera-feed">
+                    <video id="cameraVideo" autoplay muted></video>
+                </div>
+                
+                <div class="lip-canvas-container">
+                    <h3 style="color: white; margin-top: 0;">Lip Movement Visualization</h3>
+                    <canvas id="lipCanvas" width="800" height="200"></canvas>
+                    <div style="color: #a0aec0; margin-top: 10px;">
+                        Green: Target | Red: Actual | Blue: Symmetry Line
+                    </div>
+                </div>
+                
+                <div class="controls" style="margin-top: 20px;">
+                    <button class="btn btn-primary" onclick="startLipAnalysis()" id="startBtn">
+                        <span>👁️</span> Start Lip Analysis
+                    </button>
+                    <button class="btn btn-danger" onclick="stopLipAnalysis()" id="stopBtn" disabled>
+                        <span>⏹️</span> Stop
+                    </button>
+                    <button class="btn btn-success" onclick="startExercise()" id="exerciseBtn">
+                        <span>🎯</span> Start Exercise
+                    </button>
+                    <button class="btn btn-primary" onclick="analyzePhoneme()" id="analyzeBtn">
+                        <span>🔍</span> Analyze Current
+                    </button>
+                </div>
+            </div>
+            
+            <div class="analysis-panel">
+                <h3>Lip Articulation Analysis</h3>
+                
+                <div class="feedback-box" id="lipFeedback">
+                    Start lip analysis to receive real-time feedback on your articulation.
+                    Focus on symmetrical, clear lip movements for dysarthria therapy.
+                </div>
+                
+                <div class="lip-metrics">
+                    <div class="metric">
+                        <div class="metric-label">Symmetry Score</div>
+                        <div class="metric-value" id="symmetryScore">--%</div>
+                        <div>Left-Right Balance</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Opening Accuracy</div>
+                        <div class="metric-value" id="openingScore">--%</div>
+                        <div>Vertical Movement</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Roundness</div>
+                        <div class="metric-value" id="roundnessScore">--%</div>
+                        <div>Lip Contour</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Consistency</div>
+                        <div class="metric-value" id="consistencyScore">--%</div>
+                        <div>Movement Stability</div>
+                    </div>
+                </div>
+                
+                <div class="phoneme-practice">
+                    <h3 style="color: #2b6cb0; margin-top: 0;">Practice Phonemes</h3>
+                    <p>Click a phoneme to practice its lip movements:</p>
+                    
+                    <div class="phoneme-grid">
+                        <button class="phoneme-btn" onclick="practicePhoneme('p')">/p/</button>
+                        <button class="phoneme-btn" onclick="practicePhoneme('b')">/b/</button>
+                        <button class="phoneme-btn" onclick="practicePhoneme('m')">/m/</button>
+                        <button class="phoneme-btn" onclick="practicePhoneme('f')">/f/</button>
+                        <button class="phoneme-btn" onclick="practicePhoneme('v')">/v/</button>
+                        <button class="phoneme-btn" onclick="practicePhoneme('s')">/s/</button>
+                        <button class="phoneme-btn" onclick="practicePhoneme('t')">/t/</button>
+                        <button class="phoneme-btn" onclick="practicePhoneme('d')">/d/</button>
+                        <button class="phoneme-btn" onclick="practicePhoneme('k')">/k/</button>
+                        <button class="phoneme-btn" onclick="practicePhoneme('g')">/g/</button>
+                        <button class="phoneme-btn" onclick="practicePhoneme('i')">/i/</button>
+                        <button class="phoneme-btn" onclick="practicePhoneme('u')">/u/</button>
+                    </div>
+                    
+                    <div style="margin-top: 15px;">
+                        <strong>Current Practice:</strong>
+                        <span id="currentPhoneme" style="font-weight: bold; color: #2b6cb0;">None selected</span>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <h4>Recommended Exercises:</h4>
+                    <ul class="exercise-list" id="exerciseList">
+                        <li class="exercise-item">Lip rounding exercises</li>
+                        <li class="exercise-item">Symmetry practice</li>
+                        <li class="exercise-item">Exaggerated articulation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 30px; padding: 20px; background: #f7fafc; border-radius: 10px;">
+            <h3>📈 Progress Tracking</h3>
+            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 300px;">
+                    <canvas id="progressChart" width="400" height="200"></canvas>
+                </div>
+                <div style="flex: 1;">
+                    <div style="background: white; padding: 15px; border-radius: 8px;">
+                        <strong>Session Summary:</strong>
+                        <div id="sessionSummary">
+                            No session data yet. Start lip analysis to track progress.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        class LipTherapy {
+            constructor() {
+                this.mediaStream = null;
+                this.analysisActive = false;
+                this.websocket = null;
+                this.currentPhoneme = null;
+                this.metricsHistory = [];
+                this.lipCanvas = null;
+                this.ctx = null;
+                
+                this.initElements();
+                this.initCanvas();
+            }
+            
+            initElements() {
+                this.cameraVideo = document.getElementById('cameraVideo');
+                this.startBtn = document.getElementById('startBtn');
+                this.stopBtn = document.getElementById('stopBtn');
+                this.feedback = document.getElementById('lipFeedback');
+                
+                // Metric displays
+                this.symmetryScore = document.getElementById('symmetryScore');
+                this.openingScore = document.getElementById('openingScore');
+                this.roundnessScore = document.getElementById('roundnessScore');
+                this.consistencyScore = document.getElementById('consistencyScore');
+                
+                this.currentPhonemeDisplay = document.getElementById('currentPhoneme');
+                this.exerciseList = document.getElementById('exerciseList');
+                this.sessionSummary = document.getElementById('sessionSummary');
+            }
+            
+            initCanvas() {
+                this.lipCanvas = document.getElementById('lipCanvas');
+                this.ctx = this.lipCanvas.getContext('2d');
+                
+                // Set canvas size
+                this.lipCanvas.width = this.lipCanvas.offsetWidth;
+                this.lipCanvas.height = this.lipCanvas.offsetHeight;
+                
+                // Draw initial grid
+                this.drawLipGrid();
+            }
+            
+            async startLipAnalysis() {
+                try {
+                    // Request camera access
+                    this.mediaStream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            width: { ideal: 640 },
+                            height: { ideal: 480 },
+                            facingMode: "user"
+                        }
+                    });
+                    
+                    this.cameraVideo.srcObject = this.mediaStream;
+                    
+                    // Connect to lip analysis WebSocket
+                    this.connectLipWebSocket();
+                    
+                    // Start canvas animation
+                    this.startCanvasAnimation();
+                    
+                    // Update UI
+                    this.analysisActive = true;
+                    this.startBtn.disabled = true;
+                    this.stopBtn.disabled = false;
+                    
+                    this.updateFeedback("Lip analysis started. Focus on clear lip movements.");
+                    
+                    // Load exercises
+                    this.loadLipExercises();
+                    
+                } catch (error) {
+                    this.updateFeedback("Error accessing camera: " + error.message);
+                }
+            }
+            
+            connectLipWebSocket() {
+                const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                this.websocket = new WebSocket(`${protocol}//${window.location.host}/api/lip/ws/realtime`);
+                
+                this.websocket.onopen = () => {
+                    this.updateFeedback("Connected to lip analysis server. Real-time feedback active.");
+                };
+                
+                this.websocket.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    this.handleLipData(data);
+                };
+                
+                this.websocket.onerror = (error) => {
+                    console.error("Lip WebSocket error:", error);
+                };
+            }
+            
+            handleLipData(data) {
+                switch (data.type) {
+                    case 'lip_analysis':
+                        this.updateLipMetrics(data.lip_state);
+                        this.updateFeedback(data.feedback);
+                        this.metricsHistory.push(data.lip_state);
+                        break;
+                        
+                    case 'frame':
+                        // Could process frame data if needed
+                        break;
+                        
+                    case 'error':
+                        this.updateFeedback("⚠️ " + data.message);
+                        break;
+                }
+            }
+            
+            updateLipMetrics(lipState) {
+                // Update displayed metrics
+                if (lipState.symmetry_score !== undefined) {
+                    this.symmetryScore.textContent = `${(lipState.symmetry_score * 100).toFixed(1)}%`;
+                }
+                
+                if (lipState.lip_opening !== undefined) {
+                    this.openingScore.textContent = `${(lipState.lip_opening * 100).toFixed(1)}%`;
+                }
+                
+                if (lipState.lip_rounding !== undefined) {
+                    this.roundnessScore.textContent = `${(lipState.lip_rounding * 100).toFixed(1)}%`;
+                }
+                
+                // Calculate consistency from history
+                if (this.metricsHistory.length > 1) {
+                    const recentOpenings = this.metricsHistory.slice(-5).map(m => m.lip_opening || 0);
+                    const consistency = 100 - (Math.std(recentOpenings) * 100);
+                    this.consistencyScore.textContent = `${consistency.toFixed(1)}%`;
+                }
+                
+                // Update visualization
+                this.drawLipVisualization(lipState);
+            }
+            
+            drawLipGrid() {
+                const ctx = this.ctx;
+                const width = this.lipCanvas.width;
+                const height = this.lipCanvas.height;
+                
+                // Clear canvas
+                ctx.clearRect(0, 0, width, height);
+                
+                // Draw grid
+                ctx.strokeStyle = '#4a5568';
+                ctx.lineWidth = 1;
+                
+                // Vertical lines
+                for (let x = 0; x <= width; x += width / 10) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, height);
+                    ctx.stroke();
+                }
+                
+                // Horizontal lines
+                for (let y = 0; y <= height; y += height / 5) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(width, y);
+                    ctx.stroke();
+                }
+                
+                // Center line (symmetry reference)
+                ctx.strokeStyle = '#4299e1';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(width / 2, 0);
+                ctx.lineTo(width / 2, height);
+                ctx.stroke();
+            }
+            
+            drawLipVisualization(lipState) {
+                this.drawLipGrid();
+                
+                const ctx = this.ctx;
+                const width = this.lipCanvas.width;
+                const height = this.lipCanvas.height;
+                
+                // Draw target lip shape for current phoneme
+                if (this.currentPhoneme) {
+                    this.drawTargetLipShape(ctx, width, height, this.currentPhoneme);
+                }
+                
+                // Draw actual lip shape (simulated from metrics)
+                this.drawActualLipShape(ctx, width, height, lipState);
+                
+                // Draw symmetry indicators
+                this.drawSymmetryIndicators(ctx, width, height, lipState);
+            }
+            
+            drawTargetLipShape(ctx, width, height, phoneme) {
+                ctx.strokeStyle = '#48bb78';
+                ctx.fillStyle = 'rgba(72, 187, 120, 0.1)';
+                ctx.lineWidth = 3;
+                
+                // Different shapes for different phonemes
+                let centerX = width / 2;
+                let centerY = height / 2;
+                let radiusX, radiusY;
+                
+                switch (phoneme) {
+                    case 'p': case 'b': case 'm':
+                        // Closed lips
+                        radiusX = width * 0.15;
+                        radiusY = height * 0.05;
+                        break;
+                    case 'f': case 'v':
+                        // Narrow opening
+                        radiusX = width * 0.1;
+                        radiusY = height * 0.15;
+                        break;
+                    case 'i': case 'e':
+                        // Wide smile
+                        radiusX = width * 0.2;
+                        radiusY = height * 0.05;
+                        break;
+                    case 'u': case 'o':
+                        // Rounded
+                        radiusX = width * 0.15;
+                        radiusY = height * 0.15;
+                        break;
+                    default:
+                        // Neutral
+                        radiusX = width * 0.15;
+                        radiusY = height * 0.1;
+                }
+                
+                // Draw ellipse
+                ctx.beginPath();
+                ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.fill();
+                
+                // Label
+                ctx.fillStyle = '#48bb78';
+                ctx.font = 'bold 14px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(`Target: /${phoneme}/`, centerX, 20);
+            }
+            
+            drawActualLipShape(ctx, width, height, lipState) {
+                ctx.strokeStyle = '#f56565';
+                ctx.fillStyle = 'rgba(245, 101, 101, 0.1)';
+                ctx.lineWidth = 2;
+                
+                // Use lip state to draw shape
+                const centerX = width / 2;
+                const centerY = height / 2;
+                
+                // Scale metrics to canvas
+                const opening = lipState.lip_opening || 0.1;
+                const widthMetric = lipState.lip_width || 0.15;
+                const rounding = lipState.lip_rounding || 0.05;
+                
+                const radiusX = width * (0.1 + widthMetric * 0.2);
+                const radiusY = height * (0.05 + opening * 0.3);
+                
+                // Draw actual lip shape
+                ctx.beginPath();
+                ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.fill();
+                
+                // Label
+                ctx.fillStyle = '#f56565';
+                ctx.font = 'bold 14px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('Actual', centerX, height - 10);
+            }
+            
+            drawSymmetryIndicators(ctx, width, height, lipState) {
+                const symmetry = lipState.symmetry_score || 0.5;
+                
+                // Draw symmetry score bar
+                const barWidth = width * 0.8;
+                const barHeight = 10;
+                const barX = width * 0.1;
+                const barY = height - 30;
+                
+                // Background
+                ctx.fillStyle = '#4a5568';
+                ctx.fillRect(barX, barY, barWidth, barHeight);
+                
+                // Fill based on symmetry
+                ctx.fillStyle = symmetry > 0.8 ? '#48bb78' : 
+                               symmetry > 0.6 ? '#ed8936' : '#f56565';
+                ctx.fillRect(barX, barY, barWidth * symmetry, barHeight);
+                
+                // Label
+                ctx.fillStyle = 'white';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(`Symmetry: ${(symmetry * 100).toFixed(0)}%`, width / 2, barY - 5);
+            }
+            
+            startCanvasAnimation() {
+                const animate = () => {
+                    if (this.analysisActive) {
+                        this.drawLipGrid();
+                        requestAnimationFrame(animate);
+                    }
+                };
+                animate();
+            }
+            
+            stopLipAnalysis() {
+                if (this.mediaStream) {
+                    this.mediaStream.getTracks().forEach(track => track.stop());
+                    this.cameraVideo.srcObject = null;
+                }
+                
+                if (this.websocket) {
+                    this.websocket.close();
+                }
+                
+                this.analysisActive = false;
+                this.startBtn.disabled = false;
+                this.stopBtn.disabled = true;
+                
+                this.updateFeedback("Lip analysis stopped. Generating session report...");
+                this.generateSessionReport();
+            }
+            
+            practicePhoneme(phoneme) {
+                this.currentPhoneme = phoneme;
+                this.currentPhonemeDisplay.textContent = `/${phoneme}/`;
+                
+                // Update phoneme buttons
+                document.querySelectorAll('.phoneme-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.textContent.includes(phoneme)) {
+                        btn.classList.add('active');
+                    }
+                });
+                
+                this.updateFeedback(`Now practicing /${phoneme}/. Focus on the correct lip shape.`);
+                
+                // Load specific exercises for this phoneme
+                this.loadPhonemeExercises(phoneme);
+            }
+            
+            async loadLipExercises() {
+                try {
+                    const response = await fetch('/api/lip/exercises?difficulty=beginner');
+                    const data = await response.json();
+                    
+                    if (data.status === 'success') {
+                        this.displayExercises(data.exercises);
+                    }
+                } catch (error) {
+                    console.error("Error loading exercises:", error);
+                }
+            }
+            
+            async loadPhonemeExercises(phoneme) {
+                try {
+                    const response = await fetch(`/api/lip/exercises?phoneme_focus=${phoneme}`);
+                    const data = await response.json();
+                    
+                    if (data.status === 'success' && data.exercises.length > 0) {
+                        this.displayExercises(data.exercises);
+                    }
+                } catch (error) {
+                    console.error("Error loading phoneme exercises:", error);
+                }
+            }
+            
+            displayExercises(exercises) {
+                this.exerciseList.innerHTML = '';
+                
+                exercises.forEach(exercise => {
+                    const li = document.createElement('li');
+                    li.className = 'exercise-item';
+                    li.innerHTML = `
+                        <strong>${exercise.name}</strong><br>
+                        ${exercise.description}<br>
+                        <small>Duration: ${exercise.duration}s | Target: ${exercise.target_phonemes?.join(', ')}</small>
+                    `;
+                    this.exerciseList.appendChild(li);
+                });
+            }
+            
+            async analyzePhoneme() {
+                if (!this.currentPhoneme) {
+                    this.updateFeedback("Please select a phoneme to analyze first.");
+                    return;
+                }
+                
+                this.updateFeedback(`Analyzing /${this.currentPhoneme}/ articulation...`);
+                
+                // In a real implementation, this would capture video and send to server
+                // For now, simulate analysis
+                setTimeout(() => {
+                    const accuracy = 70 + Math.random() * 25;
+                    this.updateFeedback(
+                        `Analysis complete! /${this.currentPhoneme}/ articulation accuracy: ${accuracy.toFixed(1)}%<br>` +
+                        `Recommendation: Practice with exaggerated lip movements.`
+                    );
+                }, 2000);
+            }
+            
+            startExercise() {
+                if (!this.currentPhoneme) {
+                    this.updateFeedback("Please select a phoneme first.");
+                    return;
+                }
+                
+                this.updateFeedback(
+                    `Starting exercise for /${this.currentPhoneme}/.<br>` +
+                    `1. Position lips in starting position<br>` +
+                    `2. Articulate clearly<br>` +
+                    `3. Hold for 2 seconds<br>` +
+                    `4. Repeat 10 times`
+                );
+                
+                // Start exercise timer
+                let count = 0;
+                const exerciseInterval = setInterval(() => {
+                    count++;
+                    this.updateFeedback(
+                        `Exercise in progress... Repetition ${count}/10<br>` +
+                        `Focus on clear lip movements for /${this.currentPhoneme}/`
+                    );
+                    
+                    if (count >= 10) {
+                        clearInterval(exerciseInterval);
+                        this.updateFeedback(
+                            `Exercise complete! Good work practicing /${this.currentPhoneme}/.<br>` +
+                            `Take a short break before next exercise.`
+                        );
+                    }
+                }, 3000);
+            }
+            
+            updateFeedback(message) {
+                this.feedback.innerHTML = message;
+            }
+            
+            generateSessionReport() {
+                if (this.metricsHistory.length === 0) {
+                    this.sessionSummary.innerHTML = "No session data collected.";
+                    return;
+                }
+                
+                const lastMetrics = this.metricsHistory[this.metricsHistory.length - 1];
+                const avgSymmetry = this.metricsHistory.reduce((sum, m) => sum + (m.symmetry_score || 0), 0) / this.metricsHistory.length;
+                const avgOpening = this.metricsHistory.reduce((sum, m) => sum + (m.lip_opening || 0), 0) / this.metricsHistory.length;
+                
+                let summary = `
+                    <strong>Session Duration:</strong> ${this.metricsHistory.length} analysis frames<br>
+                    <strong>Average Symmetry:</strong> ${(avgSymmetry * 100).toFixed(1)}%<br>
+                    <strong>Average Opening:</strong> ${(avgOpening * 100).toFixed(1)}%<br>
+                    <strong>Phonemes Practiced:</strong> ${this.currentPhoneme ? `/${this.currentPhoneme}/` : 'None'}<br><br>
+                    <strong>Recommendations:</strong><br>
+                    • Practice daily for 15 minutes<br>
+                    • Use mirror for visual feedback<br>
+                    • Focus on symmetrical movements
+                `;
+                
+                this.sessionSummary.innerHTML = summary;
+                
+                // Update progress chart
+                this.updateProgressChart();
+            }
+            
+            updateProgressChart() {
+                const canvas = document.getElementById('progressChart');
+                const ctx = canvas.getContext('2d');
+                
+                // Clear canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                if (this.metricsHistory.length < 2) return;
+                
+                // Extract symmetry scores
+                const symmetryScores = this.metricsHistory.map(m => m.symmetry_score || 0);
+                
+                // Draw line chart
+                ctx.strokeStyle = '#4299e1';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                
+                const xStep = canvas.width / (symmetryScores.length - 1);
+                const yScale = canvas.height * 0.8;
+                
+                symmetryScores.forEach((score, index) => {
+                    const x = index * xStep;
+                    const y = canvas.height - (score * yScale) - 10;
+                    
+                    if (index === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                });
+                
+                ctx.stroke();
+                
+                // Draw points
+                ctx.fillStyle = '#4299e1';
+                symmetryScores.forEach((score, index) => {
+                    const x = index * xStep;
+                    const y = canvas.height - (score * yScale) - 10;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+                
+                // Add labels
+                ctx.fillStyle = '#4a5568';
+                ctx.font = '12px Arial';
+                ctx.fillText('Symmetry Progress', 10, 20);
+                ctx.fillText('Start', 5, canvas.height - 5);
+                ctx.fillText('End', canvas.width - 20, canvas.height - 5);
+            }
+        }
+        
+        // Add std function to Math
+        Math.std = function(arr) {
+            const mean = arr.reduce((sum, val) => sum + val, 0) / arr.length;
+            return Math.sqrt(
+                arr.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / arr.length
+            );
+        };
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            window.lipTherapy = new LipTherapy();
+        });
+    </script>
+</body>
+</html>
