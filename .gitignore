@@ -1,39 +1,23 @@
-# =========================
-# Virtual Environments
-# =========================
-.venv/
-venv/
-venv310/
-
-# =========================
-# Python Cache
-# =========================
+# Ignore Python cache
 __pycache__/
-**/__pycache__/
 *.pyc
 
-# =========================
-# Datasets (ALL PROJECTS)
-# =========================
-**/training_data/
-**/uploads/
-**/dysarthria_env/
-**/dataset/
-**/datasets/
+# Ignore Virtual Environments
+env/
+venv/
+.env
+.venv/
 
-# =========================
-# Large Files
-# =========================
-*.wav
-*.mp3
+# Ignore Data and Videos
 *.mp4
 *.avi
-*.npy
-*.npz
-*.pt
-*.pth
+*.mpg
+data/
 
-# =========================
-# Logs
-# =========================
-*.log
+# Ignore VS Code settings
+.vscode/
+
+# Ignore Large Model Weights (initially)
+*.pth
+*.pt
+weights/
