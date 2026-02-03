@@ -4,200 +4,573 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AMAC Therapy Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
         
         body {
-            background-color: #f8fafc;
-            color: #333;
-            line-height: 1.6;
-            padding: 20px;
-            max-width: 1000px;
-            margin: 0 auto;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+            color: #1a1a2e;
             min-height: 100vh;
         }
         
-        /* Header */
-        .header {
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #e2e8f0;
-        }
-        
-        .main-title {
-            color: #2c5aa0;
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-        
-        .subtitle {
-            color: #666;
-            font-size: 18px;
-            margin-bottom: 25px;
-        }
-        
-        /* Navigation */
-        .dashboard-nav {
+        /* Top Navigation Bar */
+        .navbar {
+            background: white;
+            padding: 15px 30px;
             display: flex;
-            gap: 15px;
-            margin: 20px 0;
-            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .brand-icon {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+        
+        .brand-text h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+        
+        .brand-text p {
+            font-size: 12px;
+            color: #6b7280;
+        }
+        
+        .navbar-nav {
+            display: flex;
+            gap: 8px;
         }
         
         .nav-item {
-            color: #2c5aa0;
+            padding: 10px 18px;
+            border-radius: 10px;
             text-decoration: none;
+            color: #6b7280;
             font-weight: 500;
-            padding: 8px 16px;
-            border-radius: 6px;
-            background: #f1f5f9;
-            transition: all 0.3s;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
         .nav-item:hover {
-            background: #e2e8f0;
+            background: #f3f4f6;
+            color: #667eea;
         }
         
-        /* User Info */
-        .user-info {
-            background: #fff;
+        .nav-item.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .navbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-avatar {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .user-avatar:hover {
+            transform: scale(1.05);
+        }
+        
+        .logout-btn {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border: none;
+            padding: 10px 20px;
             border-radius: 10px;
-            padding: 15px;
-            margin: 15px 0;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            display: inline-block;
-        }
-        
-        .user-name {
-            color: #2c5aa0;
             font-weight: 600;
-            font-size: 18px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            font-family: inherit;
         }
         
-        .severity {
-            display: inline-block;
-            background: #fef3c7;
-            color: #92400e;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(239, 68, 68, 0.4);
+        }
+        
+        /* Main Content */
+        .main-content {
+            padding: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        /* Welcome Section */
+        .welcome-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            border-radius: 24px;
+            padding: 40px;
+            color: white;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease;
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .welcome-section::before {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            top: -200px;
+            right: -100px;
+        }
+        
+        .welcome-section::after {
+            content: '';
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 50%;
+            bottom: -100px;
+            left: 50%;
+        }
+        
+        .welcome-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .welcome-text h2 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .welcome-text p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .welcome-actions {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .btn-primary {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 12px;
             font-weight: 600;
-            margin-left: 10px;
+            font-size: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            text-decoration: none;
         }
         
-        /* Divider */
-        .divider {
-            height: 1px;
-            background: #e2e8f0;
-            margin: 30px 0;
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
         
-        /* Dashboard Section */
-        .section-title {
-            color: #2c5aa0;
-            font-size: 24px;
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+            padding: 14px 28px;
+            border-radius: 12px;
             font-weight: 600;
-            margin: 25px 0 15px 0;
+            font-size: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            text-decoration: none;
         }
         
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        /* Stats Grid */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             gap: 20px;
-            margin: 20px 0;
+            margin-bottom: 30px;
         }
         
         .stat-card {
             background: white;
-            border-radius: 12px;
+            border-radius: 20px;
             padding: 25px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            text-align: center;
-            border-left: 5px solid #2c5aa0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.6s ease;
+            animation-fill-mode: both;
         }
         
+        .stat-card:nth-child(1) { animation-delay: 0.1s; }
+        .stat-card:nth-child(2) { animation-delay: 0.2s; }
+        .stat-card:nth-child(3) { animation-delay: 0.3s; }
+        .stat-card:nth-child(4) { animation-delay: 0.4s; }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+        }
+        
+        .stat-card.sessions::before { background: linear-gradient(90deg, #667eea, #764ba2); }
+        .stat-card.score::before { background: linear-gradient(90deg, #10b981, #059669); }
+        .stat-card.streak::before { background: linear-gradient(90deg, #f59e0b, #d97706); }
+        .stat-card.avg::before { background: linear-gradient(90deg, #ec4899, #db2777); }
+        
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            margin-bottom: 15px;
+        }
+        
+        .stat-card.sessions .stat-icon { background: rgba(102, 126, 234, 0.1); color: #667eea; }
+        .stat-card.score .stat-icon { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+        .stat-card.streak .stat-icon { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+        .stat-card.avg .stat-icon { background: rgba(236, 72, 153, 0.1); color: #ec4899; }
+        
         .stat-label {
-            color: #666;
-            font-size: 14px;
+            font-size: 13px;
+            color: #6b7280;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
         
         .stat-value {
-            color: #2c5aa0;
             font-size: 36px;
             font-weight: 700;
+            color: #1a1a2e;
         }
         
-        /* Activity Section */
-        .activity-list {
+        .stat-change {
+            font-size: 12px;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .stat-change.positive { color: #10b981; }
+        .stat-change.negative { color: #ef4444; }
+        
+        /* Content Grid */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
+        }
+        
+        /* Cards */
+        .card {
             background: white;
-            border-radius: 12px;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease 0.3s both;
+        }
+        
+        .card-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid #f3f4f6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+        
+        .card-title i {
+            color: #667eea;
+        }
+        
+        .card-body {
             padding: 25px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            margin: 20px 0;
+        }
+        
+        /* Activity List */
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
         
         .activity-item {
-            margin-bottom: 25px;
-            padding-bottom: 25px;
-            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: #f9fafb;
+            border-radius: 14px;
+            transition: all 0.3s ease;
         }
         
-        .activity-item:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
+        .activity-item:hover {
+            background: #f3f4f6;
+            transform: translateX(5px);
         }
         
-        .session-title {
-            color: #2c5aa0;
-            font-weight: 600;
-            font-size: 18px;
-            margin-bottom: 8px;
-        }
-        
-        .session-details {
-            color: #666;
-            line-height: 1.8;
-        }
-        
-        /* Patient Profile */
-        .profile-card {
-            background: white;
+        .activity-icon {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
             border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
         }
         
-        .profile-header {
+        .activity-info {
+            flex: 1;
+        }
+        
+        .activity-title {
+            font-weight: 600;
+            color: #1a1a2e;
+            margin-bottom: 3px;
+        }
+        
+        .activity-details {
+            font-size: 13px;
+            color: #6b7280;
+        }
+        
+        .activity-score {
+            font-size: 18px;
+            font-weight: 700;
+            color: #10b981;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #9ca3af;
+        }
+        
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        
+        /* Profile Card */
+        .profile-card {
+            text-align: center;
+        }
+        
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 36px;
+            color: white;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+        
+        .profile-name {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 5px;
+        }
+        
+        .profile-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            color: #92400e;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
             margin-bottom: 20px;
         }
         
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .profile-stat {
+            background: #f9fafb;
+            padding: 12px;
+            border-radius: 10px;
+        }
+        
+        .profile-stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #667eea;
+        }
+        
+        .profile-stat-label {
+            font-size: 11px;
+            color: #6b7280;
+            text-transform: uppercase;
+        }
+        
         .profile-details {
-            color: #666;
-            line-height: 1.8;
+            text-align: left;
+            margin-top: 20px;
         }
         
-        .profile-details strong {
-            color: #333;
+        .profile-detail {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 14px;
         }
         
-        /* Logout Button */
-        .logout-btn {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #2c5aa0;
-            color: white;
+        .profile-detail:last-child {
+            border-bottom: none;
+        }
+        
+        .profile-detail-label {
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .profile-detail-value {
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px;
+            }
+            
+            .navbar-nav {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .welcome-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+            }
+            
+            .welcome-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
             border: none;
             padding: 10px 20px;
             border-radius: 8px;
@@ -233,219 +606,247 @@
     </style>
 </head>
 <body>
-    <!-- Logout Button -->
-    <button id="logoutBtn" class="logout-btn"> Logout</button>
-    
-    <!-- Header -->
-    <div class="header">
-        <h1 class="main-title">AMAC Therapy</h1>
-        <p class="subtitle">Speech Improvement System</p>
-        
-        <!-- Navigation -->
-        <div class="dashboard-nav">
-            <a href="#" class="nav-item">Dashboard</a>
-            <a href="#" class="nav-item">Therapy Session</a>
-            <a href="#" class="nav-item">Progress & Charts</a>
-            <a href="#" class="nav-item">Overall Feedback</a>
-            <a href="#" class="nav-item">Help & Support</a>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <div class="brand-icon">
+                <i class="fas fa-comment-medical"></i>
+            </div>
+            <div class="brand-text">
+                <h1>AMAC Therapy</h1>
+                <p>Speech Improvement System</p>
+            </div>
         </div>
         
-        <!-- User Info -->
-        <div class="user-info">
-            <span class="user-name" id="userNameDisplay">Loading...</span>
-            <span class="severity" id="userSeverityDisplay">moderate</span>
-        </div>
-    </div>
-    
-    <!-- Divider -->
-    <div class="divider"></div>
-    
-    <!-- Dashboard Section -->
-    <h2 class="section-title">Dashboard</h2>
-    
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-label">Total Sessions</div>
-            <div class="stat-value" id="statTotalSessions">0</div>
+        <div class="navbar-nav">
+            <a href="#" class="nav-item active"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="app/static/therapy.html" class="nav-item"><i class="fas fa-microphone-alt"></i> Therapy</a>
+            <a href="#" class="nav-item"><i class="fas fa-chart-line"></i> Progress</a>
+            <a href="#" class="nav-item"><i class="fas fa-comment-dots"></i> Feedback</a>
+            <a href="#" class="nav-item"><i class="fas fa-question-circle"></i> Help</a>
         </div>
         
-        <div class="stat-card">
-            <div class="stat-label">Best Score</div>
-            <div class="stat-value" id="statBestScore">0</div>
+        <div class="navbar-actions">
+            <div class="user-avatar" id="userAvatarNav">
+                <i class="fas fa-user"></i>
+            </div>
+            <button id="logoutBtn" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <div class="welcome-content">
+                <div class="welcome-text">
+                    <h2>Welcome back, <span id="userNameDisplay">User</span>! 👋</h2>
+                    <p>Ready to continue your speech improvement journey? Start a therapy session now.</p>
+                </div>
+                <div class="welcome-actions">
+                    <a href="app/static/therapy.html" class="btn-primary">
+                        <i class="fas fa-play"></i> Start Session
+                    </a>
+                    <a href="#" class="btn-secondary">
+                        <i class="fas fa-chart-bar"></i> View Progress
+                    </a>
+                </div>
+            </div>
         </div>
         
-        <div class="stat-card">
-            <div class="stat-label">Day Streak</div>
-            <div class="stat-value" id="statDayStreak">0</div>
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card sessions">
+                <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
+                <div class="stat-label">Total Sessions</div>
+                <div class="stat-value" id="statTotalSessions">0</div>
+                <div class="stat-change positive"><i class="fas fa-arrow-up"></i> +2 this week</div>
+            </div>
+            
+            <div class="stat-card score">
+                <div class="stat-icon"><i class="fas fa-trophy"></i></div>
+                <div class="stat-label">Best Score</div>
+                <div class="stat-value" id="statBestScore">0</div>
+                <div class="stat-change positive"><i class="fas fa-arrow-up"></i> New record!</div>
+            </div>
+            
+            <div class="stat-card streak">
+                <div class="stat-icon"><i class="fas fa-fire"></i></div>
+                <div class="stat-label">Day Streak</div>
+                <div class="stat-value" id="statDayStreak">0</div>
+                <div class="stat-change positive"><i class="fas fa-fire"></i> Keep it up!</div>
+            </div>
+            
+            <div class="stat-card avg">
+                <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+                <div class="stat-label">Avg Score</div>
+                <div class="stat-value" id="statAvgScore">0</div>
+                <div class="stat-change positive"><i class="fas fa-arrow-up"></i> +5% improvement</div>
+            </div>
         </div>
         
-        <div class="stat-card">
-            <div class="stat-label">Avg Score</div>
-            <div class="stat-value" id="statAvgScore">0</div>
-        </div>
-    </div>
-    
-    <!-- Recent Activity -->
-    <h2 class="section-title">Recent Activity</h2>
-    
-    <div class="activity-list" id="activityList">
-        <div class="activity-item" style="text-align: center; color: #666;">
-            Loading recent activity...
-        </div>
-    </div>
-    
-    <!-- Patient Profile -->
-    <h2 class="section-title">Patient Profile</h2>
-    
-    <div class="profile-card">
-        <div class="profile-header">
-            <span class="user-name" id="profileUserName">Loading...</span>
-            <span class="severity" id="profileUserSeverity">moderate</span>
-        </div>
-        
-        <div class="profile-details">
-            <div><strong>Member Since:</strong> <span id="profileMemberSince">-</span></div>
-            <div><strong>Current Level:</strong> <span id="profileCurrentLevel">-</span></div>
-            <div><strong>Next Milestone:</strong> <span id="profileNextMilestone">-</span></div>
+        <!-- Content Grid -->
+        <div class="content-grid">
+            <!-- Recent Activity -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-history"></i> Recent Activity
+                    </div>
+                    <a href="#" style="color: #667eea; text-decoration: none; font-size: 14px;">View All</a>
+                </div>
+                <div class="card-body">
+                    <div class="activity-list" id="activityList">
+                        <div class="empty-state">
+                            <i class="fas fa-clock"></i>
+                            <p>No recent activity yet.<br>Start your first therapy session!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Profile Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-user"></i> Patient Profile
+                    </div>
+                </div>
+                <div class="card-body profile-card">
+                    <div class="profile-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="profile-name" id="profileUserName">Loading...</div>
+                    <div class="profile-badge" id="profileUserSeverity">Moderate Dysarthria</div>
+                    
+                    <div class="profile-stats">
+                        <div class="profile-stat">
+                            <div class="profile-stat-value" id="profileSessions">0</div>
+                            <div class="profile-stat-label">Sessions</div>
+                        </div>
+                        <div class="profile-stat">
+                            <div class="profile-stat-value" id="profileHours">0</div>
+                            <div class="profile-stat-label">Hours</div>
+                        </div>
+                        <div class="profile-stat">
+                            <div class="profile-stat-value" id="profileLevel">1</div>
+                            <div class="profile-stat-label">Level</div>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-details">
+                        <div class="profile-detail">
+                            <span class="profile-detail-label"><i class="fas fa-calendar"></i> Member Since</span>
+                            <span class="profile-detail-value" id="profileMemberSince">-</span>
+                        </div>
+                        <div class="profile-detail">
+                            <span class="profile-detail-label"><i class="fas fa-star"></i> Current Level</span>
+                            <span class="profile-detail-value" id="profileCurrentLevel">Beginner</span>
+                        </div>
+                        <div class="profile-detail">
+                            <span class="profile-detail-label"><i class="fas fa-bullseye"></i> Next Goal</span>
+                            <span class="profile-detail-value" id="profileNextMilestone">10 Sessions</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Login Protection Script -->
+    <!-- Scripts -->
     <script>
-        // API base URL - adjust if your API is on a different port
         const API_BASE_URL = 'http://localhost:8000/api';
         
-        // Check login status and load user data
         (async function() {
-            console.log('AMAC Therapy: Checking login status...');
+            console.log('AMAC Therapy: Loading dashboard...');
             
-            // Check if user is logged in
+            // Check login status
             const isLoggedIn = localStorage.getItem('amacLoggedIn') || sessionStorage.getItem('amacLoggedIn');
-            
             if (!isLoggedIn) {
-                console.log('User not logged in, redirecting to login page');
-                alert('Please login to access the AMAC Therapy dashboard');
                 window.location.href = 'login.html';
                 return;
             }
             
-            // Get username from storage
-            const username = localStorage.getItem('amacUsername') || sessionStorage.getItem('amacUsername');
-            if (!username) {
-                alert('Username not found. Please login again.');
-                window.location.href = 'login.html';
-                return;
-            }
+            const username = localStorage.getItem('amacUsername') || sessionStorage.getItem('amacUsername') || 'User';
             
-            console.log('User logged in as:', username);
+            // Update UI with username
+            document.getElementById('userNameDisplay').textContent = username;
+            document.getElementById('profileUserName').textContent = username;
+            document.getElementById('userAvatarNav').innerHTML = username.charAt(0).toUpperCase();
             
-            // Update username on page immediately
-            document.querySelectorAll('.user-name').forEach(el => {
-                el.textContent = username;
-            });
-            
-            // Fetch user data from API
+            // Fetch user data
             try {
-                // Fetch user profile
-                const profileResponse = await fetch(`${API_BASE_URL}/user/profile?username=${encodeURIComponent(username)}`);
-                const profileData = await profileResponse.json();
+                const [profileRes, progressRes, sessionsRes] = await Promise.all([
+                    fetch(`${API_BASE_URL}/user/profile?username=${encodeURIComponent(username)}`),
+                    fetch(`${API_BASE_URL}/user/progress?username=${encodeURIComponent(username)}`),
+                    fetch(`${API_BASE_URL}/therapy/sessions?user_id=${encodeURIComponent(username)}`)
+                ]);
                 
-                // Fetch user progress
-                const progressResponse = await fetch(`${API_BASE_URL}/user/progress?username=${encodeURIComponent(username)}`);
-                const progressData = await progressResponse.json();
+                const profile = await profileRes.json();
+                const progress = await progressRes.json();
+                const sessions = await sessionsRes.json();
                 
-                // Fetch recent sessions
-                const sessionsResponse = await fetch(`${API_BASE_URL}/therapy/sessions?user_id=${encodeURIComponent(username)}`);
-                const sessionsData = await sessionsResponse.json();
-                
-                // Update page with user data
-                updateDashboard(profileData, progressData, sessionsData);
-                
+                updateDashboard(profile, progress, sessions);
             } catch (error) {
-                console.error('Error fetching user data:', error);
-                // Fallback to default display if API fails
-                document.getElementById('userNameDisplay').textContent = username;
-                document.getElementById('profileUserName').textContent = username;
+                console.error('Error fetching data:', error);
             }
             
-            // Logout button functionality
+            // Logout handler
             document.getElementById('logoutBtn').addEventListener('click', function() {
-                if (confirm('Logout from AMAC Therapy?')) {
+                if (confirm('Are you sure you want to logout?')) {
                     localStorage.removeItem('amacLoggedIn');
                     localStorage.removeItem('amacUsername');
                     sessionStorage.removeItem('amacLoggedIn');
                     sessionStorage.removeItem('amacUsername');
-                    alert('Logged out successfully!');
                     window.location.href = 'login.html';
                 }
             });
-            
-            // Optional: Add user greeting
-            const greeting = document.createElement('div');
-            greeting.innerHTML = `Welcome back, <strong>${username}</strong>!`;
-            greeting.style.cssText = 'color: #2c5aa0; font-size: 16px; margin: 10px 0; padding: 10px; background: #f0f7ff; border-radius: 8px;';
-            document.querySelector('.header').appendChild(greeting);
-            
         })();
         
         function updateDashboard(profile, progress, sessions) {
-            // Update user name and severity
-            const displayName = profile.name || profile.user_id || 'User';
-            document.getElementById('userNameDisplay').textContent = displayName;
-            document.getElementById('profileUserName').textContent = displayName;
-            document.getElementById('userSeverityDisplay').textContent = profile.impairment_level || 'moderate';
-            document.getElementById('profileUserSeverity').textContent = profile.impairment_level || 'moderate';
-            
             // Update stats
             document.getElementById('statTotalSessions').textContent = progress.total_sessions || 0;
             document.getElementById('statBestScore').textContent = progress.best_score || 0;
             document.getElementById('statDayStreak').textContent = progress.current_streak || 0;
             document.getElementById('statAvgScore').textContent = Math.round(progress.average_clarity || 0);
             
-            // Update profile details
+            // Update profile
+            document.getElementById('profileSessions').textContent = progress.total_sessions || 0;
+            document.getElementById('profileUserSeverity').textContent = (profile.impairment_level || 'Moderate') + ' Dysarthria';
+            
             const memberSince = profile.created_at ? new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'Recently';
             document.getElementById('profileMemberSince').textContent = memberSince;
             
-            // Determine current level based on average score
-            let currentLevel = 'Beginner';
-            const avgScore = progress.average_clarity || 0;
-            if (avgScore >= 80) currentLevel = 'Advanced';
-            else if (avgScore >= 60) currentLevel = 'Intermediate';
-            else if (avgScore >= 40) currentLevel = 'Elementary';
-            document.getElementById('profileCurrentLevel').textContent = currentLevel;
+            let level = 'Beginner';
+            const avg = progress.average_clarity || 0;
+            if (avg >= 80) level = 'Advanced';
+            else if (avg >= 60) level = 'Intermediate';
+            else if (avg >= 40) level = 'Elementary';
+            document.getElementById('profileCurrentLevel').textContent = level;
             
-            // Get next milestone
-            const nextMilestone = progress.milestones?.find(m => !m.achieved) || { name: 'Keep practicing!' };
-            document.getElementById('profileNextMilestone').textContent = nextMilestone.name;
+            const milestone = progress.milestones?.find(m => !m.achieved) || { name: 'Keep practicing!' };
+            document.getElementById('profileNextMilestone').textContent = milestone.name;
             
-            // Update recent activity
+            // Update activity
             const activityList = document.getElementById('activityList');
             if (sessions.sessions && sessions.sessions.length > 0) {
-                activityList.innerHTML = sessions.sessions.slice(0, 2).map(session => {
+                activityList.innerHTML = sessions.sessions.slice(0, 4).map(session => {
                     const date = new Date(session.date);
                     const isToday = date.toDateString() === new Date().toDateString();
-                    const isYesterday = date.toDateString() === new Date(Date.now() - 86400000).toDateString();
-                    let dateLabel = 'Session';
-                    if (isToday) dateLabel = 'Session: Today';
-                    else if (isYesterday) dateLabel = 'Session: Yesterday';
-                    else dateLabel = `Session: ${date.toLocaleDateString()}`;
-                    
+                    const dateLabel = isToday ? 'Today' : date.toLocaleDateString();
                     return `
                         <div class="activity-item">
-                            <div class="session-title">${dateLabel}</div>
-                            <div class="session-details">
-                                Completed ${session.exercises_completed} exercises<br>
-                                Avg Score: ${session.average_score}/100
+                            <div class="activity-icon"><i class="fas fa-check"></i></div>
+                            <div class="activity-info">
+                                <div class="activity-title">Session: ${dateLabel}</div>
+                                <div class="activity-details">Completed ${session.exercises_completed} exercises</div>
                             </div>
+                            <div class="activity-score">${session.average_score}/100</div>
                         </div>
                     `;
                 }).join('');
-            } else {
-                activityList.innerHTML = `
-                    <div class="activity-item" style="text-align: center; color: #666;">
-                        No sessions yet. Start your first therapy session!
-                    </div>
-                `;
             }
         }
     </script>
